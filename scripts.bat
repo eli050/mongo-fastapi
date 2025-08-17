@@ -1,13 +1,18 @@
-oc create secret generic mongo-credentials \
-  --from-literal=MONGODB_USERNAME=appuser \
-  --from-literal=MONGODB_PASSWORD='S3curePass#123' \
-  --from-literal=MONGODB_DATABASE=mydb \
+oc create secret generic mongo-credentials `
+  --from-literal=MONGODB_USERNAME=appuser `
+  --from-literal=MONGODB_PASSWORD='S3curePass#123' `
+  --from-literal=MONGODB_DATABASE=mydb `
   --from-literal=MONGODB_ROOT_PASSWORD='RootS3cure#123'
+
+oc create configmap app-config --from-env-file=.env
 
 
 oc get secret mongo-credentials -o yaml
 
 oc new-app --name=mongo --docker-image=bitnami/mongodb:7.0 -e MONGODB_ENABLE_JOURNAL=true
+
+oc set env deployment/fastapi-app MONGO_HOST- MONGO_PORT-
+
 
 oc set env deployment/mongo --from=secret/mongo-credentials
 
