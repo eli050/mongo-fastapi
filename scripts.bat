@@ -23,6 +23,13 @@ db.createUser({
   roles: [ { role: "readWrite", db: "mydb" } ]
 })
 
+mongosh -u appuser -p 'S3curePass#123' --authenticationDatabase mydb mydb --eval "db.runCommand({ ping: 1 })"
+
+mongosh -u root -p 'RootS3cure#123' --authenticationDatabase admin
+
+mongosh -u appuser -p 'S3curePass#123' --authenticationDatabase mydb
+
+
 oc new-app . --name=fastapi-app
 
 oc set env deployment/fastapi-app --from=secret/mongo-credentials
