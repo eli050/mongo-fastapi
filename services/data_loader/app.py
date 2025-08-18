@@ -3,20 +3,23 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, EmailStr
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
-from bson import ObjectId
+
 
 # === ENV ===
-MONGO_PORT = int(os.getenv("DB_PORT", "27017"))
-MONGO_HOST = os.getenv("DB_HOST", "mongo")
-MONGO_DB   = os.getenv("MONGODB_DATABASE", "mydb")
-MONGO_USER = os.getenv("MONGODB_USERNAME")
-MONGO_PASS = os.getenv("MONGODB_PASSWORD")
+MONGO_PORT = int(os.getenv("MONGO_PORT", "27017"))
+MONGO_HOST = os.getenv("MONGO_HOST", "mongo-app")
+MONGO_DB   = os.getenv("MONGO_INITDB_DATABASE", "mydb")
+MONGO_USER = os.getenv("MONGO_USERNAME")
+MONGO_PASS = os.getenv("MONGO_PASSWORD")
+
+
 
 uri = f"mongodb://{MONGO_USER}:{MONGO_PASS}@{MONGO_HOST}:{MONGO_PORT}/{MONGO_DB}?authSource={MONGO_DB}"
 
 client = MongoClient(uri)
 db = client[MONGO_DB]
 users = db["users"]
+
 
 app = FastAPI()
 

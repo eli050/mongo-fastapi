@@ -1,53 +1,82 @@
+# 1. Create secret with username, password and database name
 oc create secret generic mongo-credentials `
-  --from-literal=MONGODB_USERNAME=appuser `
-  --from-literal=MONGODB_PASSWORD='S3curePass#123' `
-  --from-literal=MONGODB_DATABASE=mydb `
-  --from-literal=MONGODB_ROOT_PASSWORD='RootS3cure#123'
+  --from-literal=MONGO_INITDB_ROOT_USERNAME=appuser `
+  --from-literal=MONGO_INITDB_ROOT_PASSWORD='S3curePass#123' `
+  --from-literal=MONGO_INITDB_DATABASE=mydb
 
-oc create configmap app-config --from-env-file=.env
-
-
-oc get secret mongo-credentials -o yaml
-
-oc new-app --name=mongo --docker-image=bitnami/mongodb:7.0 -e MONGODB_ENABLE_JOURNAL=true
-
-oc set env deployment/fastapi-app MONGO_HOST- MONGO_PORT-
+# 2. Create new app (deployment + imagestream + service) for MongoDB
+oc new-app --docker-image=docker.io/library/mongo:7.0 --name=mongo-app
 
 
-oc set env deployment/mongo --from=secret/mongo-credentials
+# 3. Inject environment variables from the secret into the deployment
+oc set env deployment/mongo-app --from=secret/mongo-credentials
 
-oc exec -it mongo-75ccc7bcdb-c2c8l -- bash
+# 4. Verify pod and logs
+oc get pods
+oc logs deployment/mongo-app
 
-mongosh -u root -p 'RootS3cure#123' --authenticationDatabase admin mydb --eval "db.runCommand({ ping: 1 })"
+# 5. Create a persistent volume claim for MongoDB
+oc apply -f mongo-pvc.yaml
 
+# 6. Set the volume for the MongoDB deployment
+oc set volume deployment/mongo-app `
+  --add --name=mongo-storage `
+  --mount-path=/data/db `
+  --claim-name=mongo-pvc
 
+# 7. Verify the volume is set correctly
+
+# Administering MongoDB
+mongosh -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin
+
+# Connect to MongoDB using the root user
 use mydb
 db.createUser({
   user: "appuser",
-  pwd: "S3curePass#123",
+  pwd: "StrongAppPass123",
   roles: [ { role: "readWrite", db: "mydb" } ]
 })
 
-mongosh -u appuser -p 'S3curePass#123' --authenticationDatabase mydb mydb --eval "db.runCommand({ ping: 1 })"
-
-mongosh -u root -p 'RootS3cure#123' --authenticationDatabase admin
-
-mongosh -u appuser -p 'S3curePass#123' --authenticationDatabase mydb
 
 
-oc new-app . --name=fastapi-app
 
-oc set env deployment/fastapi-app --from=secret/mongo-credentials
-oc set env deployment/fastapi-app MONGO_HOST=mongo MONGO_PORT=27017
+# FastAPI App with MongoDB
+# 1. Build the FastAPI Docker image locally (tag as version 0.3)
+docker build -t eligil/fastapi-app:0.5 .
 
-# 1. יצירת BuildConfig מהתיקייה (אסטרטגיית Docker)
-oc new-build --name=fastapi-app --strategy=docker --binary
+# 2. Push the image to DockerHub
+docker push eligil/fastapi-app:0.5
 
-# 2. התחלת build מתוך הקבצים המקומיים
-oc start-build fastapi-app --from-dir=. --follow
+# 3. Create new app in OpenShift from DockerHub image
+oc new-app eligil/fastapi-app:0.5 --name=fastapi-app
 
-# 3. יצירת Deployment + Service מה־ImageStream
-oc new-app fastapi-app
+# 4. Set environment variables for MongoDB connection
+oc create secret generic appuser-credentials \
+  --from-literal=MONGO_USERNAME=appuser \
+  --from-literal=MONGO_PASSWORD=StrongAppPass123 \
+  -n eligil-dev
 
-# 4. חשיפת Route (URL חיצוני)
-oc expose service fastapi-app
+
+# 5. Inject environment variables from existing secret (mongo-credentials)
+oc set env deployment/fastapi-app --from=secret/appuser-credentials
+
+# 6. Add extra static vars (host + port)
+oc set env deployment/fastapi-app `
+  MONGO_HOST=mongo-app `
+  MONGO_PORT=27017
+
+# 7. Verify pods are running
+oc get pods
+
+# 8. Stream logs to verify FastAPI starts correctly
+oc logs -f deployment/fastapi-app
+
+# 9. Expose the FastAPI service to create a route
+oc expose service/fastapi-app
+
+# 10. Get the route URL to access the FastAPI app
+oc get route fastapi-app
+
+
+
+
