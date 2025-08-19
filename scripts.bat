@@ -16,7 +16,11 @@ oc get pods
 oc logs deployment/mongo-app
 
 # 5. Create a persistent volume claim for MongoDB
-oc apply -f mongo-pvc.yaml
+oc apply -f pvc.yaml
+
+# delete the existing volume if it exists
+oc set volume deployment/mongo-app `
+  --remove --name=mongo-app-volume-1
 
 # 6. Set the volume for the MongoDB deployment
 oc set volume deployment/mongo-app `
