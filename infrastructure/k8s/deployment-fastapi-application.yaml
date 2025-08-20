@@ -1,0 +1,221 @@
+﻿kind: Deployment
+apiVersion: apps/v1
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: '4'
+    image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"fastapi-application:0.7"},"fieldPath":"spec.template.spec.containers[?(@.name==\"fastapi-application\")].image"}]'
+    openshift.io/generated-by: OpenShiftNewApp
+  resourceVersion: '2695713137'
+  name: fastapi-application
+  uid: ed4007e2-9d14-41ba-98c8-d7caf122a46b
+  creationTimestamp: '2025-08-20T09:08:26Z'
+  generation: 4
+  managedFields:
+    - manager: oc.exe
+      operation: Update
+      apiVersion: apps/v1
+      time: '2025-08-20T09:08:26Z'
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:metadata':
+          'f:annotations':
+            .: {}
+            'f:image.openshift.io/triggers': {}
+            'f:openshift.io/generated-by': {}
+          'f:labels':
+            .: {}
+            'f:app': {}
+            'f:app.kubernetes.io/component': {}
+            'f:app.kubernetes.io/instance': {}
+        'f:spec':
+          'f:progressDeadlineSeconds': {}
+          'f:replicas': {}
+          'f:revisionHistoryLimit': {}
+          'f:selector': {}
+          'f:strategy':
+            'f:rollingUpdate':
+              .: {}
+              'f:maxSurge': {}
+              'f:maxUnavailable': {}
+            'f:type': {}
+          'f:template':
+            'f:metadata':
+              'f:annotations':
+                .: {}
+                'f:openshift.io/generated-by': {}
+              'f:labels':
+                .: {}
+                'f:deployment': {}
+            'f:spec':
+              'f:containers':
+                'k:{"name":"fastapi-application"}':
+                  .: {}
+                  'f:imagePullPolicy': {}
+                  'f:name': {}
+                  'f:ports':
+                    .: {}
+                    'k:{"containerPort":8080,"protocol":"TCP"}':
+                      .: {}
+                      'f:containerPort': {}
+                      'f:protocol': {}
+                  'f:resources': {}
+                  'f:terminationMessagePath': {}
+                  'f:terminationMessagePolicy': {}
+              'f:dnsPolicy': {}
+              'f:restartPolicy': {}
+              'f:schedulerName': {}
+              'f:securityContext': {}
+              'f:terminationGracePeriodSeconds': {}
+    - manager: openshift-controller-manager
+      operation: Update
+      apiVersion: apps/v1
+      time: '2025-08-20T09:08:27Z'
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:spec':
+          'f:template':
+            'f:spec':
+              'f:containers':
+                'k:{"name":"fastapi-application"}':
+                  'f:image': {}
+    - manager: kubectl-set
+      operation: Update
+      apiVersion: apps/v1
+      time: '2025-08-20T09:09:24Z'
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:spec':
+          'f:template':
+            'f:spec':
+              'f:containers':
+                'k:{"name":"fastapi-application"}':
+                  'f:env':
+                    .: {}
+                    'k:{"name":"MONGO_HOST"}':
+                      .: {}
+                      'f:name': {}
+                      'f:value': {}
+                    'k:{"name":"MONGO_PASSWORD"}':
+                      .: {}
+                      'f:name': {}
+                      'f:valueFrom':
+                        .: {}
+                        'f:secretKeyRef': {}
+                    'k:{"name":"MONGO_PORT"}':
+                      .: {}
+                      'f:name': {}
+                      'f:value': {}
+                    'k:{"name":"MONGO_USERNAME"}':
+                      .: {}
+                      'f:name': {}
+                      'f:valueFrom':
+                        .: {}
+                        'f:secretKeyRef': {}
+    - manager: kube-controller-manager
+      operation: Update
+      apiVersion: apps/v1
+      time: '2025-08-20T09:09:26Z'
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:metadata':
+          'f:annotations':
+            'f:deployment.kubernetes.io/revision': {}
+        'f:status':
+          'f:availableReplicas': {}
+          'f:conditions':
+            .: {}
+            'k:{"type":"Available"}':
+              .: {}
+              'f:lastTransitionTime': {}
+              'f:lastUpdateTime': {}
+              'f:message': {}
+              'f:reason': {}
+              'f:status': {}
+              'f:type': {}
+            'k:{"type":"Progressing"}':
+              .: {}
+              'f:lastTransitionTime': {}
+              'f:lastUpdateTime': {}
+              'f:message': {}
+              'f:reason': {}
+              'f:status': {}
+              'f:type': {}
+          'f:observedGeneration': {}
+          'f:readyReplicas': {}
+          'f:replicas': {}
+          'f:updatedReplicas': {}
+      subresource: status
+  namespace: a0583251203-dev
+  labels:
+    app: fastapi-application
+    app.kubernetes.io/component: fastapi-application
+    app.kubernetes.io/instance: fastapi-application
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      deployment: fastapi-application
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        deployment: fastapi-application
+      annotations:
+        openshift.io/generated-by: OpenShiftNewApp
+    spec:
+      containers:
+        - name: fastapi-application
+          image: 'eligil/fastapi-app@sha256:1bf3e70e576d14e8ec917a6d30805a60a70b77de618802239eb6a40147638224'
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: MONGO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: appuser-credentials
+                  key: MONGO_PASSWORD
+            - name: MONGO_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: appuser-credentials
+                  key: MONGO_USERNAME
+            - name: MONGO_HOST
+              value: mongo-app
+            - name: MONGO_PORT
+              value: '27017'
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
+status:
+  observedGeneration: 4
+  replicas: 1
+  updatedReplicas: 1
+  readyReplicas: 1
+  availableReplicas: 1
+  conditions:
+    - type: Available
+      status: 'True'
+      lastUpdateTime: '2025-08-20T09:08:48Z'
+      lastTransitionTime: '2025-08-20T09:08:48Z'
+      reason: MinimumReplicasAvailable
+      message: Deployment has minimum availability.
+    - type: Progressing
+      status: 'True'
+      lastUpdateTime: '2025-08-20T09:09:26Z'
+      lastTransitionTime: '2025-08-20T09:08:26Z'
+      reason: NewReplicaSetAvailable
+      message: ReplicaSet "fastapi-application-5f485b6cfd" has successfully progressed.
