@@ -17,7 +17,7 @@ class AgentUpdate(AgentBase):
     first_name: Optional[str] = Field(None, description="Agent's first name")
     last_name: Optional[str] = Field(None, description="Agent's last name")
     phone_number: Optional[str] = Field(None, description="Agent's phone number")
-    rank: Optional[str] = Field(None, description="Agent's rank")
+    rank: Optional[int] = Field(None, description="Agent's rank")
 
 class AgentOut(AgentBase):
     """Model for outputting agent data."""

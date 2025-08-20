@@ -46,13 +46,13 @@ db.createUser({
 
 # FastAPI App with MongoDB
 # 1. Build the FastAPI Docker image locally (tag as version 0.3)
-docker build -t eligil/fastapi-app:0.6 .
+docker build -t eligil/fastapi-app:0.7 .
 
 # 2. Push the image to DockerHub
-docker push eligil/fastapi-app:0.6
+docker push eligil/fastapi-app:0.7
 
 # 3. Create new app in OpenShift from DockerHub image
-oc new-app eligil/fastapi-app:0.6 --name=fastapi-app
+oc new-app eligil/fastapi-app:0.7 --name=fastapi-application
 
 # 4. Set environment variables for MongoDB connection
 oc create secret generic appuser-credentials \
@@ -62,10 +62,10 @@ oc create secret generic appuser-credentials \
 
 
 # 5. Inject environment variables from existing secret (mongo-credentials)
-oc set env deployment/fastapi-app --from=secret/appuser-credentials
+oc set env deployment/fastapi-application --from=secret/appuser-credentials
 
 # 6. Add extra static vars (host + port)
-oc set env deployment/fastapi-app `
+oc set env deployment/fastapi-application `
   MONGO_HOST=mongo-app `
   MONGO_PORT=27017
 
@@ -73,13 +73,13 @@ oc set env deployment/fastapi-app `
 oc get pods
 
 # 8. Stream logs to verify FastAPI starts correctly
-oc logs -f deployment/fastapi-app
+oc logs -f deployment/fastapi-application
 
 # 9. Expose the FastAPI service to create a route
-oc expose service/fastapi-app
+oc expose service/fastapi-application
 
 # 10. Get the route URL to access the FastAPI app
-oc get route fastapi-app
+oc get route fastapi-application
 
 
 
